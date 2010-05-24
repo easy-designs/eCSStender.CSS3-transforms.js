@@ -1,3 +1,7 @@
+*v0.2* (2010-05-24)
+
+* Opera support fixed (though Opera's still a little funky)
+
 *v0.1* (2010-05-23)
 
 * Initial checkin of transform: rotate extension

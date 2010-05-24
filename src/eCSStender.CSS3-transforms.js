@@ -2,7 +2,7 @@
 Function:       eCSStender.CSS3-transforms.js
 Author:         Aaron Gustafson (aaron at easy-designs dot net)
 Creation Date:  2010-05-23
-Version:        0.1
+Version:        0.2
 Homepage:       http://github.com/easy-designs/eCSStender.CSS3-transforms.js
 License:        MIT License 
 Note:           If you change or improve on this script, please let us know by
@@ -16,7 +16,7 @@ Note:           If you change or improve on this script, please let us know by
   e = eCSStender,
   // Extensions
   RotateObject = new Rotate( e ),
-  MSUtils, $;
+  Utils, $;
 
   // Objects
   function Rotate( e )
@@ -37,7 +37,9 @@ Note:           If you change or improve on this script, please let us know by
     TRANSFORM = 'transform',
     ROTATE    = 'rotate',
     DEGREES   = 'deg',
+    RADIANS   = 'rad',
     MATRIX    = 'matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)', // rotate(45deg)
+    ROTATION  = ROTATE + O_PAREN + '0.79' + RADIANS + C_PAREN, // rotate(45deg)
     MS_MATRIX = 'filter: progid:DXImageTransform.Microsoft.Matrix',
     MS_TEST   = MS_MATRIX + "(sizingMethod='auto expand')";
     
@@ -53,7 +55,7 @@ Note:           If you change or improve on this script, please let us know by
                    ( e.isSupported( PROPERTY, MOZ + transform ) ||
                      e.isSupported( PROPERTY, WEBKIT + transform ) ||
                      e.isSupported( PROPERTY, KHTML + transform ) ||
-                     e.isSupported( PROPERTY, OPERA + transform ) ||
+                     e.isSupported( PROPERTY, OPERA + TRANSFORM + COLON + ROTATION ) ||
                      e.isSupported( PROPERTY, MS_TEST ) ) );
         },
         fingerprint: 'net.easy-designs.' + TRANSFORM + O_PAREN + ROTATE + C_PAREN
@@ -70,12 +72,12 @@ Note:           If you change or improve on this script, please let us know by
       EMPTY       = '',
       style_block = EMPTY,
       transform   = TRANSFORM + COLON + MATRIX,
+      radians     = e.isSupported( PROPERTY, OPERA + TRANSFORM + COLON + ROTATION ),
       prefix      = ( e.isSupported( PROPERTY, MOZ + transform ) ||
                       e.isSupported( PROPERTY, WEBKIT + transform ) ||
-                      e.isSupported( PROPERTY, KHTML + transform ) ||
-                      e.isSupported( PROPERTY, OPERA + transform ) ),
+                      e.isSupported( PROPERTY, KHTML + transform ) ),
       is_IE       = e.isSupported( PROPERTY, MS_TEST ),
-      prop, degrees, str, $els;
+      prop, degrees, str, rstr, $els;
       
       if ( is_IE &&
            e.methods['MSSetOrigin'] === UNDEFINED )
@@ -84,7 +86,7 @@ Note:           If you change or improve on this script, please let us know by
         // should we load jQuery?
         if ( window.jQuery === UNDEFINED )
         {
-          MSUtils.loadScript('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js', function(){
+          Utils.loadScript('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js', function(){
             $ = window.jQuery;
             run( selector, properties, medium );
           });
@@ -93,7 +95,7 @@ Note:           If you change or improve on this script, please let us know by
         
         eCSStender.addMethod( 'MSSetOrigin', function( el, x, y ){
           // set the filter
-          MSUtils.addToMatrix( el, {
+          Utils.addToMatrix( el, {
             'Dx': x,
             'Dy': y 
           });
@@ -113,14 +115,14 @@ Note:           If you change or improve on this script, please let us know by
           BC     = 'background-color',
           original_height = $el.height(),
           original_width  = $el.width(),
-          radians         = degrees * ( Math.PI * 2 / 360 ),
+          radians         = Utils.degreesToRadians( degrees ),
           costheta        = Math.cos( radians ),
           sintheta        = Math.sin( radians ),
           vertical_offset, horizontal_offset, top, left;
           // give the element some layout
           el.contentEditable = true;
           // set the filter
-          MSUtils.addToMatrix( el, {
+          Utils.addToMatrix( el, {
             'M11': costheta,
             'M12': -sintheta,
             'M21': sintheta,
@@ -168,17 +170,18 @@ Note:           If you change or improve on this script, please let us know by
       degrees = parseInt( properties[TRANSFORM].replace( /rotate\((-?\d+)deg\)/, '$1' ), 10 );
       for ( prop in properties )
       {
-        if ( prefix )
+        if ( prefix || radians )
         {
           if ( prop == TRANSFORM )
           {
-            str = TRANSFORM + COLON + ROTATE + O_PAREN + degrees + DEGREES + C_PAREN + SEMICOL;
+            str  = TRANSFORM + COLON + ROTATE + O_PAREN + degrees + DEGREES + C_PAREN + SEMICOL;
+            rstr = str.replace( /-?\d+deg/, Utils.degreesToRadians( degrees ) + RADIANS );
           }
           else
           {
-            str = prop + COLON + properties[prop] + SEMICOL;
+            str = rstr = prop + COLON + properties[prop] + SEMICOL;
           }
-          style_block += MOZ + str + WEBKIT + str + KHTML + str + OPERA + str;
+          style_block += MOZ + str + WEBKIT + str + KHTML + str + OPERA + rstr;
         }
         // Microsoft
         else if ( is_IE )
@@ -275,7 +278,11 @@ Note:           If you change or improve on this script, please let us know by
   }
   
   // Microsoft stuff
-  MSUtils = {
+  Utils = {
+    degreesToRadians: function( degrees )
+    {
+      return degrees * ( Math.PI * 2 / 360 );
+    },
     addToMatrix: function( el, additions )
     {
       var
