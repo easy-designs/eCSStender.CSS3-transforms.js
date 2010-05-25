@@ -14,9 +14,10 @@ Note:           If you change or improve on this script, please let us know by
   
   var
   e = eCSStender,
+  $ = false,
   // Extensions
   RotateObject = new Rotate( e ),
-  Utils, $;
+  Utils;
 
   // Objects
   function Rotate( e )
@@ -86,7 +87,7 @@ Note:           If you change or improve on this script, please let us know by
         // should we load jQuery?
         if ( window.jQuery === UNDEFINED )
         {
-          Utils.loadScript('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js', function(){
+          Utils.loadScript('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js',function(){
             $ = window.jQuery;
             run( selector, properties, medium );
           });
@@ -233,7 +234,6 @@ Note:           If you change or improve on this script, please let us know by
                 {
                   x = width / 2;
                 }
-                var y;
                 // keywords
                 if ( coords[0] == L ||
                      coords[1] == L ||
@@ -336,21 +336,38 @@ Note:           If you change or improve on this script, please let us know by
     },
     loadScript: function( src, callback )
     {
-      var script      = document.createElement('script');
-      script.type     = 'text/javascript';
-      script.onreadystatechange = function(){
-        if ( script.readyState == 'loaded' ||
-             script.readyState == 'complete' )
+      var
+      scripts = document.getElementsByTagName('script'),
+      i       = scripts.length,
+      script  = document.createElement('script');
+      while ( i-- )
+      {
+        if ( scripts[i].src == src )
         {
-          script.onreadystatechange = null;
-          if ( callback instanceof Function )
+          script = false;
+        }
+      }
+      if ( script )
+      {
+        script.type = 'text/javascript';
+        script.onreadystatechange = function(){
+          if ( script.readyState == 'loaded' ||
+               script.readyState == 'complete' )
           {
-            callback();
-          }
-        } 
-      };
-      script.src = src;
-      document.getElementsByTagName('head')[0].appendChild(script);
+            script.onreadystatechange = null;
+            if ( callback instanceof Function )
+            {
+              callback();
+            }
+          } 
+        };
+        script.src = src;
+        document.getElementsByTagName('head')[0].appendChild(script);
+      }
+      else
+      {
+        setTimeout(callback,500);
+      }
     }
   };
       
