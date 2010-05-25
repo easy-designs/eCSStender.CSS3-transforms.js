@@ -1,3 +1,7 @@
+*v0.2.1* (2010-05-25)
+
+* Tweak to keep jQuery from being loaded more than once
+
 *v0.2* (2010-05-24)
 
 * Opera support fixed (though Opera's still a little funky)

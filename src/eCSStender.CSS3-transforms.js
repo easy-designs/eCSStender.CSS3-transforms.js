@@ -2,7 +2,7 @@
 Function:       eCSStender.CSS3-transforms.js
 Author:         Aaron Gustafson (aaron at easy-designs dot net)
 Creation Date:  2010-05-23
-Version:        0.2
+Version:        0.2.1
 Homepage:       http://github.com/easy-designs/eCSStender.CSS3-transforms.js
 License:        MIT License 
 Note:           If you change or improve on this script, please let us know by
