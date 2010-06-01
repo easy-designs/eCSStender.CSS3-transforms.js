@@ -2,7 +2,7 @@
 Function:       eCSStender.CSS3-transforms.js
 Author:         Aaron Gustafson (aaron at easy-designs dot net)
 Creation Date:  2010-05-23
-Version:        0.2.1
+Version:        0.3
 Homepage:       http://github.com/easy-designs/eCSStender.CSS3-transforms.js
 License:        MIT License 
 Note:           If you change or improve on this script, please let us know by
@@ -39,7 +39,7 @@ Note:           If you change or improve on this script, please let us know by
     ROTATE    = 'rotate',
     DEGREES   = 'deg',
     RADIANS   = 'rad',
-    MATRIX    = 'matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)', // rotate(45deg)
+    MATRIX    = 'matrix(0.7, 0.7, -0.7, 0.7, 0, 0)', // rotate(45deg)
     ROTATION  = ROTATE + O_PAREN + '0.79' + RADIANS + C_PAREN, // rotate(45deg)
     MS_MATRIX = 'filter: progid:DXImageTransform.Microsoft.Matrix',
     MS_TEST   = MS_MATRIX + "(sizingMethod='auto expand')";
@@ -56,7 +56,9 @@ Note:           If you change or improve on this script, please let us know by
                    ( e.isSupported( PROPERTY, MOZ + transform ) ||
                      e.isSupported( PROPERTY, WEBKIT + transform ) ||
                      e.isSupported( PROPERTY, KHTML + transform ) ||
+                     // opera has 2 implementations now
                      e.isSupported( PROPERTY, OPERA + TRANSFORM + COLON + ROTATION ) ||
+                     e.isSupported( PROPERTY, OPERA + transform ) ||
                      e.isSupported( PROPERTY, MS_TEST ) ) );
         },
         fingerprint: 'net.easy-designs.' + TRANSFORM + O_PAREN + ROTATE + C_PAREN
@@ -67,7 +69,6 @@ Note:           If you change or improve on this script, please let us know by
     
     function run( selector, properties, medium )
     {
-      
       var
       UNDEFINED,
       EMPTY       = '',
@@ -76,7 +77,8 @@ Note:           If you change or improve on this script, please let us know by
       radians     = e.isSupported( PROPERTY, OPERA + TRANSFORM + COLON + ROTATION ),
       prefix      = ( e.isSupported( PROPERTY, MOZ + transform ) ||
                       e.isSupported( PROPERTY, WEBKIT + transform ) ||
-                      e.isSupported( PROPERTY, KHTML + transform ) ),
+                      e.isSupported( PROPERTY, KHTML + transform )||
+                      e.isSupported( PROPERTY, OPERA + transform ) ),
       is_IE       = e.isSupported( PROPERTY, MS_TEST ),
       prop, degrees, str, rstr, $els;
       
@@ -87,14 +89,14 @@ Note:           If you change or improve on this script, please let us know by
         // should we load jQuery?
         if ( window.jQuery === UNDEFINED )
         {
-          Utils.loadScript('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js',function(){
+          e.loadScript('http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js',function(){
             $ = window.jQuery;
             run( selector, properties, medium );
           });
           return;
         }
         
-        eCSStender.addMethod( 'MSSetOrigin', function( el, x, y ){
+        e.addMethod( 'MSSetOrigin', function( el, x, y ){
           // set the filter
           Utils.addToMatrix( el, {
             'Dx': x,
@@ -103,7 +105,7 @@ Note:           If you change or improve on this script, please let us know by
         });
         
         // create the rotation function
-        eCSStender.addMethod( 'MSRotate', function( el, degrees ){
+        e.addMethod( 'MSRotate', function( el, degrees ){
           var
           $el    = $( el ),
           TOP    = 'top',
@@ -191,7 +193,7 @@ Note:           If you change or improve on this script, please let us know by
           {
             case TRANSFORM:
               $els.each(function(){
-                eCSStender.methods.MSRotate( this, degrees );
+                e.methods.MSRotate( this, degrees );
               });
               break;
             case TRANSFORM + '-origin':
@@ -261,7 +263,7 @@ Note:           If you change or improve on this script, please let us know by
                 {
                   y = height / 2;
                 }
-                eCSStender.methods.MSSetOrigin( this, x, y );
+                e.methods.MSSetOrigin( this, x, y );
               });
               break;
           }
@@ -333,41 +335,6 @@ Note:           If you change or improve on this script, please let us know by
         str += "'" + value + "'";
       }
       return str + ',';
-    },
-    loadScript: function( src, callback )
-    {
-      var
-      scripts = document.getElementsByTagName('script'),
-      i       = scripts.length,
-      script  = document.createElement('script');
-      while ( i-- )
-      {
-        if ( scripts[i].src == src )
-        {
-          script = false;
-        }
-      }
-      if ( script )
-      {
-        script.type = 'text/javascript';
-        script.onreadystatechange = function(){
-          if ( script.readyState == 'loaded' ||
-               script.readyState == 'complete' )
-          {
-            script.onreadystatechange = null;
-            if ( callback instanceof Function )
-            {
-              callback();
-            }
-          } 
-        };
-        script.src = src;
-        document.getElementsByTagName('head')[0].appendChild(script);
-      }
-      else
-      {
-        setTimeout(callback,500);
-      }
     }
   };
       

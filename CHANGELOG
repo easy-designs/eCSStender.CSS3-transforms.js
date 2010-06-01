@@ -1,3 +1,8 @@
+*v0.3* (2010-06-01)
+
+* Added support for Opera's latest implementation of rotation
+* switched to using eCSStender's loadScript method (rather than a private one)
+
 *v0.2.1* (2010-05-25)
 
 * Tweak to keep jQuery from being loaded more than once
